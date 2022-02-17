@@ -31,7 +31,7 @@ data_struct: El tipo de dato que se debe de iterar. Lanzará un error al intenta
 ## Ejemplos
 
 #### Array
-`
+```
   var _array = [0, 1, 2, 3, 4, 5];  
   iter "in" , _array exc
     show_debug_message(in);
@@ -39,10 +39,10 @@ data_struct: El tipo de dato que se debe de iterar. Lanzará un error al intenta
     //  Mostrará
     //  0, 1, 2, 3, 4, 5
   fin
-`
+```
 
 #### Struct
-`
+```
   var _struct = {
     be: " me",
     not: " for bee",
@@ -57,7 +57,7 @@ data_struct: El tipo de dato que se debe de iterar. Lanzará un error al intenta
     //  not for bee
     //  no honey for me
   fin
-`
+```
 
 
 
