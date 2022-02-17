@@ -35,11 +35,10 @@ data_struct: El tipo de dato que se debe de iterar. Lanzará un error al intenta
   var _array = [0, 1, 2, 3, 4, 5];  
   iter "in" , _array exc
     show_debug_message(in);
-    /*
-      will show
-      0, 1, 2, 3, 4, 5
-      
-    */
+    
+    //  Mostrará
+    //  0, 1, 2, 3, 4, 5
+  fin
 `
 
 #### Struct
@@ -52,12 +51,11 @@ data_struct: El tipo de dato que se debe de iterar. Lanzará un error al intenta
 
   iter "in" , _struct exc
     show_debug_message("\n" + key + in);
-    /*
-      will show
-      be me
-      not for bee
-      no honey for me
-    */
+    
+    //  Mostrará
+    //  be me
+    //  not for bee
+    //  no honey for me
   fin
 `
 
