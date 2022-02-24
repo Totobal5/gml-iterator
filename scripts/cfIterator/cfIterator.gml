@@ -1,11 +1,7 @@
-#macro GML_ITERATOR_CREDITS	"GML Iterator - creado por toto "
-#macro GML_ITERATOR_VERSION	"\nversion: 1.0.0"	
+#macro GML_ITERATOR_CREDITS	"-- GML Iterator - Creado por toto --"
+#macro GML_ITERATOR_VERSION	"\n-- version: 1.0.0 --"	
 
 show_debug_message(GML_ITERATOR_CREDITS + GML_ITERATOR_VERSION);
-
-
-#macro START_TIMER	var time1, time2; time1 = get_timer();
-#macro END_TIMER	time2 = get_timer(); show_debug_message("time: " + string( (time2 - time1) / 1000) + " [ms]");
 
 globalvar __trstack, __trtop, __trold;
 
@@ -13,53 +9,44 @@ __trstack = ds_stack_create();
 __trtop = -1;
 __trold = -2;
 
-/**
-	@param {Mixed} data
-	@param type
-	@param [ds_type]
-	, _ds = undefined
-*/
+/** @param {Mixed} data */
 function __TypeReader() {
 	#region Definir struct
 	if (__trtop == __trold) return (__trtop.__reset() );
 	
 	var _push = {
-		data: undefined,				// Se puede acceder a la data si es que se necesita
+		// Accesibles
+		data: argument0,				// Se puede acceder a la data si es que se necesita
+		inst: other,
 		prev: ds_stack_top(__trstack),	// Obtener iteracion previa si es que se necesita
 		
-		__name : "",
-		__kname: "",
-		__iname: "",
+		__name : argument1 ?? "in",	/// @ignore
 		
-		__pos: -1,
-		__len: -1,
+		__kname: "",	/// @ignore
+		__iname: "",	/// @ignore
 		
-		__reset: function() {__pos = -1; return (__set() ); },
-		__set:	 function() {return self; }
+		__pos: -1,		/// @ignore
+		__len: -1,		/// @ignore
+		
+		__reset: function() {__pos = -1; return (__set() ); },	/// @ignore
+		__set  : function() {return self; },					/// @ignore
+		__inrange: function(_value, _min, _max) {
+			return (!is_undefined(_value) ) ? clamp(_value, _min, _max) : _max; 	
+		}
 	}
 	
 	#endregion
 	
 	if (is_array(argument0) ) {
 		with (_push) {
-			data = argument0;
-			__name  = argument1;
 			__iname = argument2 ?? "i";
 			
 			// Soporte para in range (se usa el argumento 4)
-			var _len = array_length(data);
-			
-			if (!is_undefined(argument3) ) {
-				__len = clamp(argument3, 0, _len);	
-			} else {
-				__len = _len;	
-			}
+			__len = __inrange(argument3, 1, array_length(data) );
 			
 			__set = function() {
 				__pos++;
-				
-				if (__pos > __len - 1) exit;
-				
+
 				variable_struct_set(self, __name ,	data[__pos] );
 				variable_struct_set(self, __iname,	__pos ); 
 
@@ -69,24 +56,20 @@ function __TypeReader() {
 	}
 	else if (is_struct(argument0) ) {
 		with (_push) {
-			data = argument0;
-			__name  = argument1;
 			__kname = argument2 ?? "key";
 			__iname = argument3 ??   "i";
 			
 			__keys = variable_struct_get_names(data);
-			__len  = array_length(__keys);
 			
+			// Soporte para in range (se usa el argumento 5)
+			__len = __inrange(argument4, 1, array_length(__keys) );
+
 			__set = function() {
-				__pos++
-				
-				if (__pos > __len - 1) exit;
-				
-				var _key = __keys[__pos];
+				var _key = __keys[++__pos];
 				
 				variable_struct_set(self, __name ,	data[$ _key] );
 				
-				variable_struct_set(self, __kname,	_key ); 
+				variable_struct_set(self, __kname,	 _key); 
 				variable_struct_set(self, __iname,	__pos);
 				
 				return self;
@@ -95,20 +78,19 @@ function __TypeReader() {
 	}
 	else if (is_string(argument0) ) {
 		with (_push) {
-			data = argument0;
-			__name  = argument1
-			__iname = argument2 ??   "i";
-			__rname = argument3 ?? "pos";	// Posicion empezando desde 0
+			__kname = argument2 ?? "char";	// Caracter en la posicion
+			__iname = argument3 ??   "i";	// Posicion del string (desde 1 a __len)
 			
-			__len = string_length(data);
+			// Soporte para in range (se usa el argumento 5)
+			__len = __inrange(argument4, 2, string_length(data) );
 			__pos = 0;	// String empiezan de 1 (osea poner en 0)
 			
 			__set = function() {
 				__pos++;
 				
-				variable_struct_set(self, __name ,	string_char_at(data, __pos) );
+				variable_struct_set(self,  __name,  string_copy(data, 0, __pos) );	// Texto recreado
+				variable_struct_set(self, __kname,	string_char_at(data, __pos) );	// Caracter
 				variable_struct_set(self, __iname,	__pos );
-				variable_struct_set(self, __rname,	__pos - 1);
 
 				return self;
 			}
@@ -119,17 +101,20 @@ function __TypeReader() {
 			}
 		}
 	}
+	else if (is_undefined(argument0) ) {
+		with (_push) __len = 0;
+		show_debug_message("Iterator: Undefined data!!");
+	}
 	else {
 		// Obtener el ultimo
-		switch (argument[argument_count - 1] ) {
+		switch (argument1) {
 			#region DS List
 			case ds_type_list:
 				with (_push) {
-					data = argument0;
-					__name  = argument1;
-					__iname = argument2 ?? "i";
-			
-					__len = ds_list_size(data);
+					__name  = argument2 ?? "in";
+					__iname = argument3 ??  "i";
+					__len = __inrange(argument4, 1, ds_list_size(data) );
+					
 					__set = function() {
 						__pos++;
 				
@@ -145,18 +130,14 @@ function __TypeReader() {
 			#region DS Map
 			case ds_type_map:
 				with (_push) {
-					data = argument0;
-					__name  = argument1;
 					__kname = argument2 ?? "key";
 					__iname = argument3 ??   "i";
 			
 					__keys = ds_map_keys_to_array(data);
-					__len  = array_length(__keys);
-					__pos  = -1;
+					__len  = __inrange(argument4, 1, array_length(__keys) );
 					
 					__set = function() {
-						__pos++;
-						var _key = __keys[__pos];
+						var _key = __keys[++__pos];
 						
 						variable_struct_set(self, __name ,	data[? _key] );
 				
@@ -172,13 +153,11 @@ function __TypeReader() {
 			#region DS Grid
 			case ds_type_grid:
 				with (_push) {
-					data = argument0;
-					__name  = argument1;
 					__iname = argument2 ?? "i";	// x grid
 					__kname = argument3 ?? "j";	// y grid
 			
 					__real_len = [ds_grid_height(data), ds_grid_width(data) ];
-					__len = __real_len[0] * __real_len[1];	// Obtener las veces necesarias para iterar
+					__len = __inrange(argument4, 1, __real_len[0] * __real_len[1] );
 					
 					__pos = [0, -1];
 					
@@ -208,7 +187,7 @@ function __TypeReader() {
 				
 			#endregion
 			
-			default:	show_error("Iterator - Data type not supported", true);	break;
+			default:	show_error("Iterator - Data type not supported", false);	break;
 		}
 	}
 	// Push shiet
@@ -217,39 +196,14 @@ function __TypeReader() {
 	
 	ds_stack_push(__trstack, _push);
 	
-	return (__trtop.__set() );
+	return (__trtop);
 }
 
-#macro Iterate	with(__TypeReader(
-#macro Work		)){repeat(__len) {
-#macro End		__set();}} ds_stack_pop(__trstack);  
+#macro iterate	with(__TypeReader(
+#macro wk		)){repeat(__len) {__set();
+#macro en		}} ds_stack_pop(__trstack);  
 
-
-
-var _struct = {
-	sex: array_create(100, 10),	
-	exs: array_create(100, 10),
-	omy: array_create(100, 10),
-}
-
-START_TIMER
-
-repeat (1000) {
-	Iterate _struct, "in", "variable", "index" Work
-		if (is_array(in) ) {
-			Iterate in, "in" Work	
-				show_debug_message("array: " + string(in) );
-			End
-		}
-	
-		show_debug_message(variable + string(in) );
-	End
-}
-
-END_TIMER
-
-
-/*
+/*ada
 	TODO:
 		* optimizar nomás.
 		* quitar ese with? X no se puede
