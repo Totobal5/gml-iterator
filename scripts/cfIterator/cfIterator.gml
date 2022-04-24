@@ -211,7 +211,6 @@ function __TypeReader() {
 	return (__trtop);
 }
 
-#macro iterate	with(__TypeReader
-#macro istart	)repeat(__len) {__set();
+#macro iterate	with(__TypeReader(
+#macro istart	))repeat(__len) {__set();
 #macro iend		} ds_stack_pop(__trstack);  
-
