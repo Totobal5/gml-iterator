@@ -16,11 +16,11 @@ iend
 
 #### Arrays y List
 ```iterate(data, name, index)```
-en donde data es el array/list que se intenta iterar, name es el nombre que se desea usar para los valores adentro del array/list y index es el nombre que se desea usar para el indice que se encuentra el iterador.
+en donde data es el array que se intenta iterar, name es el nombre que se desea usar para los valores adentro del array y index es el nombre que se desea usar para el indice que se encuentra el iterador.
 
 #### Struct y Map
 ```iterate(data, name, key, index)```
-en donde data es el struct/map que se intenta iterar, name es el nombre que se desea usar para los valores adentro del struct/map, key es el nombre que se desea usar para la llave que se encuentra el iterador y index es el nombre que se desea usar para el indice que se encuentra el iterador.
+en donde data es el struct que se intenta iterar, name es el nombre que se desea usar para los valores adentro del struct, key es el nombre que se desea usar para la llave que se encuentra el iterador y index es el nombre que se desea usar para el indice que se encuentra el iterador.
 
 #### String
 ```iterate(data, name, char, index)```
@@ -32,12 +32,12 @@ en donde data es el string que se intenta iterar, name es el nombre que se desea
 #### Array
 ```
   var _array = [0, 1, 2, 3, 4, 5];  
-  iterate(_array, "valor") istart
-    show_debug_message(valor);
-  istart
-  
-  //  Mostrará
-  //  0, 1, 2, 3, 4, 5
+  iter "in" , _array exc
+    show_debug_message(in);
+    
+    //  Mostrará
+    //  0, 1, 2, 3, 4, 5
+  fin
 ```
 
 #### Struct
@@ -48,13 +48,15 @@ en donde data es el string que se intenta iterar, name es el nombre que se desea
     no: " honey for me"
   }
 
-  iterate(_struct, "in", "key") istart
+  iter "in" , _struct exc
     show_debug_message("\n" + key + in);
-  iend
-
+    
     //  Mostrará
     //  be me
     //  not for bee
     //  no honey for me
   fin
 ```
+
+
+
