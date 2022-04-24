@@ -1,5 +1,5 @@
 #macro GML_ITERATOR_CREDITS	"-- GML Iterator - Creado por toto --"
-#macro GML_ITERATOR_VERSION	"\n-- version: 1.0.0 --"	
+#macro GML_ITERATOR_VERSION	"\n-- version: 1.1.0 --"	
 
 show_debug_message(GML_ITERATOR_CREDITS + GML_ITERATOR_VERSION);
 
@@ -9,7 +9,7 @@ __trstack = ds_stack_create();
 __trtop = -1;
 __trold = -2;
 
-/** @param {Mixed} data */
+/// @param {Mixed} data
 function __TypeReader() {
 	#region Definir struct
 	if (__trtop == __trold) return (__trtop.__reset() );
@@ -17,7 +17,7 @@ function __TypeReader() {
 	var _push = {
 		// Accesibles
 		data: argument0,				// Se puede acceder a la data si es que se necesita
-		inst: other,
+		inst: other,					// Obtener quien llama un iterator
 		prev: ds_stack_top(__trstack),	// Obtener iteracion previa si es que se necesita
 		
 		__name : argument1 ?? "in",	/// @ignore
@@ -29,7 +29,7 @@ function __TypeReader() {
 		__len: -1,		/// @ignore
 		
 		__reset: function() {__pos = -1; return (__set() ); },	/// @ignore
-		__set  : function() {return self; },					/// @ignore
+		//__set  : function() {return self; },					/// @ignore
 		__inrange: function(_value, _min, _max) {
 			return (!is_undefined(_value) ) ? clamp(_value, _min, _max) : _max; 	
 		}
@@ -38,6 +38,7 @@ function __TypeReader() {
 	#endregion
 	
 	if (is_array(argument0) ) {
+		#region Array
 		with (_push) {
 			__iname = argument2 ?? "i";
 			
@@ -53,8 +54,10 @@ function __TypeReader() {
 				return self;
 			}
 		}
+		#endregion
 	}
 	else if (is_struct(argument0) ) {
+		#region Struct
 		with (_push) {
 			__kname = argument2 ?? "key";
 			__iname = argument3 ??   "i";
@@ -75,8 +78,11 @@ function __TypeReader() {
 				return self;
 			}
 		}
+		
+		#endregion
 	}
 	else if (is_string(argument0) ) {
+		#region String
 		with (_push) {
 			__kname = argument2 ?? "char";	// Caracter en la posicion
 			__iname = argument3 ??   "i";	// Posicion del string (desde 1 a __len)
@@ -100,12 +106,16 @@ function __TypeReader() {
 				return (__set() );
 			}
 		}
+		#endregion
 	}
 	else if (is_undefined(argument0) ) {
+		#region Error
 		with (_push) __len = 0;
 		show_debug_message("Iterator: Undefined data!!");
+		#endregion
 	}
 	else {
+		#region DS DATA
 		// Obtener el ultimo
 		switch (argument1) {
 			#region DS List
@@ -189,8 +199,10 @@ function __TypeReader() {
 			
 			default:	show_error("Iterator - Data type not supported", false);	break;
 		}
+		
+		#endregion
 	}
-	// Push shiet
+	// Push
 	__trold = __trtop;
 	__trtop =   _push;
 	
@@ -199,12 +211,7 @@ function __TypeReader() {
 	return (__trtop);
 }
 
-#macro iterate	with(__TypeReader(
-#macro wk		)){repeat(__len) {__set();
-#macro en		}} ds_stack_pop(__trstack);  
+#macro iterate	with(__TypeReader
+#macro istart	)repeat(__len) {__set();
+#macro iend		} ds_stack_pop(__trstack);  
 
-/*ada
-	TODO:
-		* optimizar nomás.
-		* quitar ese with? X no se puede
-*/
